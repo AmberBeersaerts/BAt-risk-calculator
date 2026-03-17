@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>BAt COPD Exacerbation Risk Calculator</title>
+
+<style>
+body{
+    font-family: Arial, Helvetica, sans-serif;
+    background:#f4f6fb;
+    margin:0;
+}
+
+.container{
+    max-width:900px;
+    margin:auto;
+    padding:30px;
+}
+
+.logo{
+    max-height:70px;
+    margin-bottom:10px;
+}
+
+.card{
+    background:white;
+    padding:25px;
+    margin-bottom:20px;
+    border-radius:10px;
+    box-shadow:0 4px 12px rgba(0,0,0,0.08);
+}
+
+.grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:20px 40px;
+    align-items:start;
+}
+
+.grid div {
+    display:flex;
+    flex-direction:column;
+    justify-content:flex-start;
+}
+
+label{
+    font-weight:bold;
+    font-size:14px;
+    margin-bottom:4px;
+}
+
+.small-text{
+    font-weight:normal;
+    font-size:11px;
+    color:#555;
+    margin-bottom:4px;
+    line-height:1.2;
+    min-height:18px; /* reserve space to align inputs */
+}
+
+.input-wrapper{
+    display:flex;
+    flex-direction:column;
+}
+
+input, select{
+    width:100%;
+    padding:8px;
+    border:1px solid #ccc;
+    border-radius:6px;
+    box-sizing:border-box;
+}
+
+button{
+    background:#2c6bed;
+    color:white;
+    border:none;
+    padding:12px 18px;
+    font-size:16px;
+    border-radius:8px;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#1f4fb8;
+}
+
+.result{
+    background:#eef3ff;
+    font-size:18px;
+    padding:20px;
+    border-radius:10px;
+}
+
+.warning{
+    color:red;
+    font-weight:bold;
+    margin-top:10px;
+}
+
+.error-text {
+    color: red;
+    font-size: 12px;
+    min-height: 16px; /* reserve space zodat layout niet springt */
+}
+
+h1{
+    margin-top:0;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<img src="Cicero_logo_dark-removebg.png" class="logo" alt="Cicero Logo">
+
+<h1>BAt COPD Exacerbation Risk Calculator</h1>
+<p>Clinical calculator for baseline status, acuity level and risk stratification for COPD exacerbations.</p>
+
+<div class="card">
+<h3>Baseline variables</h3>
+<div class="grid">
+<div class="input-wrapper">
+    <label>mMRC</label>
+    <input id="mMRC" type="number" min="0" max="4">
+    <span class="error-text" id="mMRC-error"></span>
+</div>
+<div class="input-wrapper">
+    <label>BMI</label>
+    <input id="BMI" type="number" min="0">
+    <span class="error-text" id="BMI-error"></span>
+</div>
+<div class="input-wrapper">
+    <label>Clinical Frailty Scale</label>
+    <input id="CFS" type="number" min="1" max="9">
+    <span class="error-text" id="CFS-error"></span>
+</div>
+<div class="input-wrapper">
+    <label>FEV1 (%)</label>
+    <input id="FEV1" type="number" min="0">
+    <span class="error-text" id="FEV1-error"></span>
+</div>
+</div>
+</div>
+
+<div class="card">
+<h3>Acuity variables</h3>
+<div class="grid">
+<div class="input-wrapper">
+    <label>ΔmMRC</label>
+    <span class="small-text">Acute mMRC minus baseline mMRC</span>
+    <input id="dmMRC" type="number">
+</div>
+<div class="input-wrapper">
+    <label>SpO2 (%)</label>
+    <input id="spo2" type="number" min="0" max="100">
+    <span class="error-text" id="spo2-error"></span>
+</div>
+<div class="input-wrapper">
+    <label>Supplemental oxygen (L)</label>
+    <span class="small-text">In addition to LTOT</span>
+    <input id="oxygen" type="number" min="0">
+    <span class="error-text" id="oxygen-error"></span>
+</div>
+<div class="input-wrapper">
+    <label>SBP (mmHg)</label>
+    <input id="sbp" type="number" min="0">
+    <span class="error-text" id="sbp-error"></span>
+</div>
+<div class="input-wrapper">
+    <label>DBP (mmHg)</label>
+    <input id="dbp" type="number" min="0">
+    <span class="error-text" id="dbp-error"></span>
+</div>
+<div class="input-wrapper">
+    <label>RR (breaths/min)</label>
+    <input id="rr" type="number">
+</div>
+<div class="input-wrapper">
+    <label>Tachy-arrhythmia</label>
+    <span class="small-text">&nbsp;</span>
+    <select id="tach">
+        <option value="">Select</option>
+        <option value="1">Yes</option>
+        <option value="0">No</option>
+    </select>
+</div>
+<div class="input-wrapper">
+    <label>Confusion</label>
+    <span class="small-text">&nbsp;</span>
+    <select id="conf">
+        <option value="">Select</option>
+        <option value="1">Yes</option>
+        <option value="0">No</option>
+    </select>
+</div>
+<div class="input-wrapper">
+    <label>PaCO2 (mmHg)</label>
+    <input id="paco2" type="number" min="0">
+    <span class="error-text" id="paco2-error"></span>
+</div>
+<div class="input-wrapper">
+    <label>pH</label>
+    <input id="ph" type="number" min="0" max="14" step="0.01">
+    <span class="error-text" id="ph-error"></span>
+</div>
+</div>
+</div>
+
+<button onclick="calculate()">Calculate risk</button>
+<div id="warning" class="warning"></div>
+
+<div class="result">
+Baseline level: <b id="baseline"></b><br><br>
+Acuity level: <b id="acuity"></b><br><br>
+Risk group: <b id="risk"></b><br><br>
+<div id="advice"></div>
+</div>
+
+</div>
+
+<script>
+function validateField(id, value, min, max){
+    let el = document.getElementById(id + "-error");
+    if(value < min || (max !== null && value > max)){
+        el.innerText = "Value out of range";
+        return false;
+    } else {
+        el.innerText = "";
+        return true;
+    }
+}
+
+function calculate(){
+    let warningEl = document.getElementById("warning");
+    warningEl.innerText = "";
+
+    document.getElementById("baseline").innerText = "";
+    document.getElementById("acuity").innerText = "";
+    document.getElementById("risk").innerText = "";
+    document.getElementById("advice").innerText = "";
+
+    let m = document.getElementById("mMRC").value;
+    let bmi = document.getElementById("BMI").value;
+    let cfs = document.getElementById("CFS").value;
+    let fev1 = document.getElementById("FEV1").value;
+    let dm = document.getElementById("dmMRC").value;
+    let spo2 = document.getElementById("spo2").value;
+    let oxygen = document.getElementById("oxygen").value;
+    let sbp = document.getElementById("sbp").value;
+    let dbp = document.getElementById("dbp").value;
+    let rr = document.getElementById("rr").value;
+    let tach = document.getElementById("tach").value;
+    let conf = document.getElementById("conf").value;
+    let paco2 = document.getElementById("paco2").value;
+    let ph = document.getElementById("ph").value;
+
+    let fields = [m,bmi,cfs,fev1,dm,spo2,oxygen,sbp,dbp,rr,tach,conf,paco2,ph];
+    if(fields.some(f => f === "")){
+        warningEl.innerText = "Please fill in all fields before calculating.";
+        return;
+    }
+
+    // Omzetten naar nummers
+    m = Number(m); bmi = Number(bmi); cfs = Number(cfs); fev1 = Number(fev1);
+    dm = Number(dm); spo2 = Number(spo2); oxygen = Number(oxygen);
+    sbp = Number(sbp); dbp = Number(dbp); rr = Number(rr);
+    tach = Number(tach); conf = Number(conf); paco2 = Number(paco2); ph = Number(ph);
+
+    // Validatie ranges
+    let valid = true;
+    valid &= validateField("mMRC", m, 0, 4);
+    valid &= validateField("CFS", cfs, 1, 9);
+    valid &= validateField("spo2", spo2, 0, 100);
+    valid &= validateField("sbp", sbp, 0, null);
+    valid &= validateField("dbp", dbp, 0, null);
+    valid &= validateField("oxygen", oxygen, 0, null);
+    valid &= validateField("BMI", bmi, 0, null);
+    valid &= validateField("FEV1", fev1, 0, null);
+    valid &= validateField("paco2", paco2, 0, null);
+    valid &= validateField("ph", ph, 0, 14);
+
+    if(!valid){
+        warningEl.innerText = "Please correct the fields highlighted in red.";
+        return;
+    }
+
+    // Baseline puntenberekening
+    let m_points = (m<=1)?0:(m==2)?1:(m==3)?2:(m==4)?3:0;
+    let bmi_points = (bmi>=21)?0:(bmi>=18.5)?1:2;
+    let cfs_points = (cfs<=3)?0:(cfs==4)?1:(cfs<=6)?2:3;
+    let fev1_points = (fev1>=65)?0:(fev1>=50)?1:(fev1>=36)?2:3;
+    let baseline_points = m_points + bmi_points + cfs_points + fev1_points;
+    let baseline;
+    if(baseline_points<=1) baseline="B1";
+    else if(baseline_points<=4) baseline="B2";
+    else if(baseline_points<=7) baseline="B3";
+    else baseline="B4";
+
+    // Acuity berekening
+    let exacerbation = (dm>=1) || (m==4);
+    let oxygen_condition = (oxygen > 0) || (spo2 < 92);
+    let deterioration = oxygen_condition || (sbp<=90 && dbp<=60) || (rr>=24) || (tach==1) || (conf==1);
+
+    let acuity;
+    if(exacerbation && deterioration && paco2>45 && ph<7.35) acuity="A4";
+    else if(exacerbation && deterioration) acuity="A3";
+    else if(exacerbation) acuity="A2";
+    else acuity="A1";
+
+    // Risk group
+    let risk;
+    if((["B1","B2"].includes(baseline) && acuity=="A4") || (["B3","B4"].includes(baseline) && ["A3","A4"].includes(acuity))) risk="High risk";
+    else if((["B1","B2"].includes(baseline) && acuity=="A3") || (["B3","B4"].includes(baseline) && ["A1","A2"].includes(acuity))) risk="Medium risk";
+    else risk="Low risk";
+
+    document.getElementById("baseline").innerText = baseline;
+    document.getElementById("acuity").innerText = acuity;
+    document.getElementById("risk").innerText = risk;
+
+    let adviceEl = document.getElementById("advice");
+    if(risk === "Low risk") {
+        adviceEl.innerText = "Likely outpatient management: intermediate care or hospital at home";
+    } else if(risk === "Medium risk") {
+        adviceEl.innerText = "Outpatient management: intermediate care or hospital at home, or inpatient management: invasive monitoring and treatment or early referral to palliative care";
+    } else if(risk === "High risk") {
+        adviceEl.innerText = "Likely inpatient management: invasive monitoring and treatment or early referral to palliative care";
+    } else {
+        adviceEl.innerText = "";
+    }
+}
+</script>
+
+</body>
+</html>
